@@ -70,6 +70,7 @@ public class LinkedMap<K, V> {
             wordCount.add(word, countValue);
         }
 
+        System.out.println("In sentence \"" + sentence + "\":");
         wordCount.display();
     }
 
