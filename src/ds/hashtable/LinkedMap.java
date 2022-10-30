@@ -1,61 +1,92 @@
 package ds.hashtable;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
 public class LinkedMap<K, V> {
 
-    MyMapNode head;
+    private ArrayList<MyMapNode<K, V>> buckets;
+    private int noOfBuckets;
 
-    class MyMapNode {
+    LinkedMap() {
+        buckets = new ArrayList<>();
+        noOfBuckets = 10;
 
-        K key;
-        V value;
-        MyMapNode next;
-
-        MyMapNode(K key, V value) {
-            this.key = key;
-            this.value = value;
+        for (int i = 0; i < noOfBuckets; i++) {
+            buckets.add(null);
         }
     }
 
-    public void add(K key, V value) {
+    final int hashCode(K key) {
+        return Objects.hashCode(key);
+    }
 
-        MyMapNode newNode = new MyMapNode(key, value);
+    int getBucketIndex(K key) {
+        int index = hashCode(key) % noOfBuckets;
+        index = index < 0 ? index * -1 : index;
+        return index;
+    }
+
+    public void add(K key, V value) {
+        int bucketIndex = getBucketIndex(key);
+        MyMapNode<K, V> head = buckets.get(bucketIndex);
+
+        int hashCode = hashCode(key);
+        MyMapNode<K, V> newNode = new MyMapNode(key, value, hashCode);
+
         if (head == null) {
             head = newNode;
+            buckets.set(bucketIndex, head);
         } else {
-            MyMapNode temp = head;
-            while (temp.next != null) {
-                if (temp.key.equals(key)) {
-                    temp.value = value;
+            while (head.next != null) {
+                if (head.key.equals(key)) {
+                    head.value = value;
                     return;
                 }
-                temp = temp.next;
+                head = head.next;
             }
-            temp.next = newNode;
+
+            if (head.key.equals(key)) {
+                head.value = value;
+                return;
+            }
+
+            head.next = newNode;
         }
     }
 
     public V get(K key) {
-        MyMapNode temp = head;
-        while (temp != null) {
-            if (temp.key.equals(key)) {
-                return temp.value;
+        int bucketIndex = getBucketIndex(key);
+
+        MyMapNode<K, V> head = buckets.get(bucketIndex);
+        while (head != null) {
+            if (head.key.equals(key)) {
+                return head.value;
             }
-            temp = temp.next;
+            head = head.next;
         }
         return null;
     }
 
     public void display() {
-        MyMapNode temp = head;
-        while (temp != null) {
-            System.out.println("'" + temp.key + "' present " + temp.value + " time!");
-            temp = temp.next;
+        for (int i = 0; i < noOfBuckets; i++) {
+
+            MyMapNode<K, V> head = buckets.get(i);
+            while (head != null) {
+                System.out.println("'" + head.key + "' present " + head.value + " time!");
+                head = head.next;
+            }
         }
     }
 
     public static void main(String[] args) {
-        String sentence = "To be or not to be";
-        String[] words = sentence.split(" ");
+        String paragraph = "Paranoids are not"
+                + " paranoid because they are paranoid but"
+                + " because they keep putting themselves"
+                + " deliberately into paranoid avoidable"
+                + " situations";
+        
+        String[] words = paragraph.split(" ");
 
         LinkedMap<String, Integer> wordCount = new LinkedMap<>();
 
@@ -70,7 +101,7 @@ public class LinkedMap<K, V> {
             wordCount.add(word, countValue);
         }
 
-        System.out.println("In sentence \"" + sentence + "\":");
+        System.out.println("In sentence \"" + paragraph + "\":");
         wordCount.display();
     }
 
