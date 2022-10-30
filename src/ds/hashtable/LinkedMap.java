@@ -5,8 +5,8 @@ import java.util.Objects;
 
 public class LinkedMap<K, V> {
 
-    private ArrayList<MyMapNode<K, V>> buckets;
-    private int noOfBuckets;
+    private final ArrayList<MyMapNode<K, V>> buckets;
+    private final int noOfBuckets;
 
     LinkedMap() {
         buckets = new ArrayList<>();
@@ -55,6 +55,46 @@ public class LinkedMap<K, V> {
         }
     }
 
+    // Method to remove a given key
+    public void remove(K key) {
+        // Apply hash function to find index for given key
+        int bucketIndex = getBucketIndex(key);
+        int hashCode = hashCode(key);
+        // Get head of chain
+        MyMapNode<K, V> head = buckets.get(bucketIndex);
+
+        // If key was not there
+        if (head == null)
+            return;
+        else if (head.next == null && head.key.equals(key) && hashCode == head.hashCode) {
+            head = null;
+            buckets.set(bucketIndex, head); // ******** Added Newly
+            return;
+        }
+
+        MyMapNode<K, V> temp = head;
+        MyMapNode<K, V> left = temp;
+        MyMapNode<K, V> right = left.next;
+
+        // Delete First
+        if (temp.key.equals(key) && hashCode == temp.hashCode) {
+            temp = temp.next;
+        }
+
+        while (right != null) {
+
+            if (right.key.equals(key) && hashCode == right.hashCode) {
+                left.next = right.next;
+                break;
+            }
+            left = left.next;
+            right = right.next;
+        }
+
+        buckets.set(bucketIndex, temp);
+
+    }
+
     public V get(K key) {
         int bucketIndex = getBucketIndex(key);
 
@@ -77,32 +117,6 @@ public class LinkedMap<K, V> {
                 head = head.next;
             }
         }
-    }
-
-    public static void main(String[] args) {
-        String paragraph = "Paranoids are not"
-                + " paranoid because they are paranoid but"
-                + " because they keep putting themselves"
-                + " deliberately into paranoid avoidable"
-                + " situations";
-        
-        String[] words = paragraph.split(" ");
-
-        LinkedMap<String, Integer> wordCount = new LinkedMap<>();
-
-        for (String word : words) {
-            int countValue;
-            try {
-                countValue = wordCount.get(word);
-            } catch (NullPointerException npe) {
-                countValue = 0;
-            }
-            countValue++;
-            wordCount.add(word, countValue);
-        }
-
-        System.out.println("In sentence \"" + paragraph + "\":");
-        wordCount.display();
     }
 
 }
